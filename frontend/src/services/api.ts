@@ -6,6 +6,7 @@ export interface Participant {
   joinedAt: string;
   lastActiveAt?: number;
   isDrawer?: boolean;
+  score: number;
 }
 
 export interface DrawingAction {
