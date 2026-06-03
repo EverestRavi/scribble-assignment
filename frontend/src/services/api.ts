@@ -8,6 +8,21 @@ export interface Participant {
   isDrawer?: boolean;
 }
 
+export interface DrawingAction {
+  type: "DRAW" | "CLEAR";
+  data?: any;
+  timestamp: number;
+}
+
+export interface Guess {
+  id: string;
+  participantId: string;
+  participantName: string;
+  text: string;
+  isCorrect: boolean;
+  timestamp: number;
+}
+
 export interface RoomSnapshot {
   code: string;
   status: "lobby" | "playing" | "finished";
@@ -19,6 +34,8 @@ export interface RoomSnapshot {
   wordLength?: number;
   drawerId?: string;
   roundNumber?: number;
+  drawingState: DrawingAction[];
+  guesses: Guess[];
 }
 
 export interface RoomSessionResponse {
@@ -69,6 +86,18 @@ export const api = {
     return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/start`, {
       method: "POST",
       body: JSON.stringify({ participantId })
+    });
+  },
+  submitDrawing(code: string, participantId: string, action: DrawingAction) {
+    return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/drawing`, {
+      method: "POST",
+      body: JSON.stringify({ participantId, action })
+    });
+  },
+  submitGuess(code: string, participantId: string, text: string) {
+    return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/guesses`, {
+      method: "POST",
+      body: JSON.stringify({ participantId, text })
     });
   }
 };
