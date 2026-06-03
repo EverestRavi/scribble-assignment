@@ -37,6 +37,7 @@ export function handleGuess(roomCode: string, participantId: string, payload: Gu
 
   if (isCorrect) {
     participant.score += 100;
+    room.status = "result";
   }
 
   return saveRoom(room);

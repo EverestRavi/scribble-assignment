@@ -154,9 +154,51 @@ export function saveRoom(room: Room) {
   return getRoom(room.code);
 }
 
+export function endRound(code: string) {
+  const room = rooms.get(code);
+  if (!room) return null;
+  if (room.status !== "playing") return null;
+  
+  room.status = "result";
+  room.updatedAt = now();
+  rooms.set(code, room);
+  return cloneRoom(room);
+}
+
+export function restartGame(code: string, hostId: string) {
+  const room = rooms.get(code);
+  
+  if (!room) {
+    throw new Error("Room not found");
+  }
+  
+  if (room.participants[0]?.id !== hostId) {
+    throw new Error("Only the host can restart the game");
+  }
+
+  room.status = "lobby";
+  room.secretWord = undefined;
+  room.wordLength = undefined;
+  room.drawerId = undefined;
+  room.roundNumber = undefined;
+  room.guesses = [];
+  room.drawingState = [];
+  
+  room.participants.forEach(p => {
+    p.score = 0;
+    p.isDrawer = false;
+  });
+
+  room.updatedAt = now();
+  rooms.set(code, room);
+  
+  return cloneRoom(room);
+}
+
 export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSnapshot {
   const isDrawer = room.drawerId && room.drawerId === viewerParticipantId;
-  const secretWord = isDrawer ? room.secretWord : null;
+  const showSecretWord = isDrawer || room.status === "result";
+  const secretWord = showSecretWord ? room.secretWord : null;
 
   return {
     code: room.code,
@@ -190,7 +232,7 @@ setInterval(() => {
       if (room.status === "playing" && room.drawerId) {
         const drawerExists = room.participants.some(p => p.id === room.drawerId);
         if (!drawerExists) {
-          room.status = "finished"; // End round/game if drawer disconnects
+          room.status = "result"; // End round/game if drawer disconnects
         }
       }
     }

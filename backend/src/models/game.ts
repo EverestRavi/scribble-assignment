@@ -2,7 +2,7 @@ import { DrawingAction } from "./drawing.js";
 import { Guess } from "./guess.js";
 
 export type ParticipantRole = "drawer" | "guesser";
-export type RoomStatus = "lobby" | "playing" | "finished";
+export type RoomStatus = "lobby" | "playing" | "finished" | "result";
 
 export interface Participant {
   id: string;

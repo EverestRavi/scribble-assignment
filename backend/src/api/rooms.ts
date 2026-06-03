@@ -12,6 +12,7 @@ import {
 import { createRoom, getRoom, joinRoom, toRoomSnapshot, recordParticipantActivity, startGame } from "../services/roomStore.js";
 import { handleDrawingAction } from "../services/drawingService.js";
 import { handleGuess } from "../services/guessService.js";
+import { endRound, restartGame } from "../services/roomStore.js";
 
 export function createRoomsRouter() {
   const router = Router();
@@ -147,6 +148,45 @@ export function createRoomsRouter() {
       } else {
         next(error);
       }
+    }
+  });
+
+  router.post("/:code/restart", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const participantId = request.headers["x-player-id"] as string;
+      
+      const room = restartGame(code.toUpperCase(), participantId);
+      
+      response.json({
+        room: toRoomSnapshot(room, participantId)
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("Only the host")) {
+        next(new HttpError(401, error.message));
+      } else {
+        next(error);
+      }
+    }
+  });
+
+  router.post("/:code/end-round", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const participantId = request.headers["x-player-id"] as string;
+      
+      // We can optionally verify if it's the host here.
+      const room = endRound(code.toUpperCase());
+      
+      if (!room) {
+        throw new HttpError(404, "Room not found or not playing");
+      }
+      
+      response.json({
+        room: toRoomSnapshot(room, participantId)
+      });
+    } catch (error) {
+      next(error);
     }
   });
 
