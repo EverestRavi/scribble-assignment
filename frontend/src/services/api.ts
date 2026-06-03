@@ -25,7 +25,7 @@ export interface Guess {
 
 export interface RoomSnapshot {
   code: string;
-  status: "lobby" | "playing" | "finished";
+  status: "lobby" | "playing" | "finished" | "result";
   participants: Participant[];
   availableWords: string[];
   roles: ParticipantRole[];
@@ -98,6 +98,22 @@ export const api = {
     return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/guesses`, {
       method: "POST",
       body: JSON.stringify({ participantId, text })
+    });
+  },
+  restartGame(code: string, participantId: string) {
+    return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/restart`, {
+      method: "POST",
+      headers: {
+        "x-player-id": participantId
+      }
+    });
+  },
+  endRound(code: string, participantId: string) {
+    return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/end-round`, {
+      method: "POST",
+      headers: {
+        "x-player-id": participantId
+      }
     });
   }
 };

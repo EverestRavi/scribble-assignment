@@ -8,6 +8,7 @@ import { Scoreboard } from "../components/Scoreboard";
 import { useRoomState, useRoomStore } from "../state/roomStore";
 import { Canvas } from "../components/Canvas";
 import { GuessHistory } from "../components/GuessHistory";
+import { ResultScreen } from "../components/ResultScreen";
 
 export function GamePage() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export function GamePage() {
 
   useEffect(() => {
     let interval: number;
-    if (room && room.status === "playing") {
+    if (room && (room.status === "playing" || room.status === "result")) {
       interval = window.setInterval(() => {
         roomStore.fetchRoom().catch((e) => console.error("Polling failed", e));
       }, 1000);
@@ -27,6 +28,8 @@ export function GamePage() {
   useEffect(() => {
     if (!room) {
       navigate("/", { replace: true });
+    } else if (room.status === "lobby") {
+      navigate("/lobby", { replace: true });
     }
   }, [navigate, room]);
 
@@ -54,45 +57,49 @@ export function GamePage() {
         <RoomCodeBadge code={room.code} />
       </div>
 
-      <div className="game-page__layout">
-        <aside className="game-page__sidebar game-page__sidebar--left">
-          <Scoreboard />
-          <ResultPanel />
-        </aside>
+      {room.status === "result" ? (
+        <ResultScreen />
+      ) : (
+        <div className="game-page__layout">
+          <aside className="game-page__sidebar game-page__sidebar--left">
+            <Scoreboard />
+            <ResultPanel />
+          </aside>
 
-        <div className="game-page__main">
-          <Card title="Canvas">
-            <Canvas />
-          </Card>
-        </div>
-
-        <aside className="game-page__sidebar game-page__sidebar--right">
-          <Card title="Player Info">
-            <dl className="detail-list">
-              <div>
-                <dt>Name</dt>
-                <dd>{viewer?.name ?? "Unknown player"}</dd>
-              </div>
-              <div>
-                <dt>Role</dt>
-                <dd>{isDrawer ? "Drawer" : "Guesser"}</dd>
-              </div>
-              <div>
-                <dt>Status</dt>
-                <dd>Playing</dd>
-              </div>
-            </dl>
-          </Card>
-
-          {!isDrawer && (
-            <Card title="Your Guess">
-              <GuessForm />
+          <div className="game-page__main">
+            <Card title="Canvas">
+              <Canvas />
             </Card>
-          )}
+          </div>
 
-          <GuessHistory />
-        </aside>
-      </div>
+          <aside className="game-page__sidebar game-page__sidebar--right">
+            <Card title="Player Info">
+              <dl className="detail-list">
+                <div>
+                  <dt>Name</dt>
+                  <dd>{viewer?.name ?? "Unknown player"}</dd>
+                </div>
+                <div>
+                  <dt>Role</dt>
+                  <dd>{isDrawer ? "Drawer" : "Guesser"}</dd>
+                </div>
+                <div>
+                  <dt>Status</dt>
+                  <dd>Playing</dd>
+                </div>
+              </dl>
+            </Card>
+
+            {!isDrawer && (
+              <Card title="Your Guess">
+                <GuessForm />
+              </Card>
+            )}
+
+            <GuessHistory />
+          </aside>
+        </div>
+      )}
 
       <div className="button-row">
         <button className="button button--secondary" onClick={() => navigate("/lobby")}>
