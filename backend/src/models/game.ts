@@ -1,3 +1,6 @@
+import { DrawingAction } from "./drawing.js";
+import { Guess } from "./guess.js";
+
 export type ParticipantRole = "drawer" | "guesser";
 export type RoomStatus = "lobby" | "playing" | "finished";
 
@@ -7,6 +10,7 @@ export interface Participant {
   joinedAt: string;
   lastActiveAt?: number; // UNIX timestamp (ms) of last poll
   isDrawer?: boolean;
+  score: number;
 }
 
 export interface Room {
@@ -19,6 +23,8 @@ export interface Room {
   wordLength?: number;
   drawerId?: string;
   roundNumber?: number;
+  guesses: Guess[];
+  drawingState: DrawingAction[];
 }
 
 export interface RoomSnapshot {
@@ -32,6 +38,8 @@ export interface RoomSnapshot {
   wordLength?: number;
   drawerId?: string;
   roundNumber?: number;
+  guesses: Guess[];
+  drawingState: DrawingAction[];
 }
 
 export interface RoomSessionResponse {
