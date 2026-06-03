@@ -4,9 +4,10 @@ import {
   HttpError,
   joinRoomSchema,
   roomCodeParamsSchema,
-  roomViewerQuerySchema
+  roomViewerQuerySchema,
+  startGameSchema
 } from "./schemas.js";
-import { createRoom, getRoom, joinRoom, toRoomSnapshot } from "../services/roomStore.js";
+import { createRoom, getRoom, joinRoom, toRoomSnapshot, recordParticipantActivity, startGame } from "../services/roomStore.js";
 
 export function createRoomsRouter() {
   const router = Router();
@@ -40,7 +41,11 @@ export function createRoomsRouter() {
         room: toRoomSnapshot(result.room, result.participantId)
       });
     } catch (error) {
-      next(error);
+      if (error instanceof Error && (error.message === "Room is full" || error.message === "Name is already taken")) {
+        next(new HttpError(400, error.message));
+      } else {
+        next(error);
+      }
     }
   });
 
@@ -48,6 +53,11 @@ export function createRoomsRouter() {
     try {
       const { code } = roomCodeParamsSchema.parse(request.params);
       const { participantId } = roomViewerQuerySchema.parse(request.query);
+      
+      if (participantId) {
+        recordParticipantActivity(code.toUpperCase(), participantId);
+      }
+
       const room = getRoom(code.toUpperCase());
 
       if (!room) {
@@ -59,6 +69,30 @@ export function createRoomsRouter() {
       });
     } catch (error) {
       next(error);
+    }
+  });
+
+  router.post("/:code/start", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = startGameSchema.parse(request.body);
+      
+      const room = startGame(code.toUpperCase(), participantId);
+      
+      response.json({
+        room: toRoomSnapshot(room, participantId)
+      });
+    } catch (error) {
+      if (error instanceof Error && (
+        error.message === "Room not found" ||
+        error.message === "Cannot start game with fewer than 2 players" ||
+        error.message === "Only the host can start the game" ||
+        error.message === "Game has already started"
+      )) {
+        next(new HttpError(400, error.message));
+      } else {
+        next(error);
+      }
     }
   });
 

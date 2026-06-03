@@ -12,7 +12,7 @@ function generateCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
 
-  for (let index = 0; index < 4; index += 1) {
+  for (let index = 0; index < 6; index += 1) {
     code += alphabet[Math.floor(Math.random() * alphabet.length)];
   }
 
@@ -29,15 +29,12 @@ function generateUniqueCode() {
   return code;
 }
 
-function displayName(name?: string) {
-  return name || "Player";
-}
-
-function createParticipant(name?: string): Participant {
+function createParticipant(name: string): Participant {
   return {
     id: randomUUID(),
-    name: displayName(name),
-    joinedAt: now()
+    name: name.trim(),
+    joinedAt: now(),
+    lastActiveAt: Date.now()
   };
 }
 
@@ -49,7 +46,7 @@ export function listWords() {
   return [...STARTER_WORDS];
 }
 
-export function createRoom(playerName?: string) {
+export function createRoom(playerName: string) {
   const participant = createParticipant(playerName);
   const room: Room = {
     code: generateUniqueCode(),
@@ -67,14 +64,23 @@ export function createRoom(playerName?: string) {
   };
 }
 
-export function joinRoom(code: string, playerName?: string) {
+export function joinRoom(code: string, playerName: string) {
   const room = rooms.get(code);
 
   if (!room) {
     return null;
   }
 
-  const participant = createParticipant(playerName);
+  if (room.participants.length >= 12) {
+    throw new Error("Room is full");
+  }
+
+  const nameTrimmed = playerName.trim();
+  if (room.participants.some(p => p.name.toLowerCase() === nameTrimmed.toLowerCase())) {
+    throw new Error("Name is already taken");
+  }
+
+  const participant = createParticipant(nameTrimmed);
   room.participants.push(participant);
   room.updatedAt = now();
   rooms.set(room.code, room);
@@ -88,6 +94,42 @@ export function joinRoom(code: string, playerName?: string) {
 export function getRoom(code: string) {
   const room = rooms.get(code);
   return room ? cloneRoom(room) : null;
+}
+
+export function recordParticipantActivity(code: string, participantId: string) {
+  const room = rooms.get(code);
+  if (room) {
+    const participant = room.participants.find(p => p.id === participantId);
+    if (participant) {
+      participant.lastActiveAt = Date.now();
+    }
+  }
+}
+
+export function startGame(code: string, hostId: string) {
+  const room = rooms.get(code);
+  
+  if (!room) {
+    throw new Error("Room not found");
+  }
+  
+  if (room.participants.length < 2) {
+    throw new Error("Cannot start game with fewer than 2 players");
+  }
+  
+  if (room.participants[0]?.id !== hostId) {
+    throw new Error("Only the host can start the game");
+  }
+  
+  if (room.status !== "lobby") {
+    throw new Error("Game has already started");
+  }
+  
+  room.status = "playing";
+  room.updatedAt = now();
+  rooms.set(code, room);
+  
+  return cloneRoom(room);
 }
 
 export function saveRoom(room: Room) {
@@ -104,6 +146,22 @@ export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSn
     status: room.status,
     participants: room.participants.map((participant) => ({ ...participant })),
     availableWords: listWords(),
-    roles: [...STARTER_ROLES]
+    roles: [...STARTER_ROLES],
+    hostId: room.participants[0]?.id ?? ""
   };
 }
+
+setInterval(() => {
+  const cutoff = Date.now() - 10000;
+  
+  for (const [code, room] of rooms.entries()) {
+    const initialCount = room.participants.length;
+    room.participants = room.participants.filter(p => (p.lastActiveAt ?? Date.now()) > cutoff);
+    
+    if (room.participants.length === 0) {
+      rooms.delete(code);
+    } else if (room.participants.length < initialCount) {
+      room.updatedAt = now();
+    }
+  }
+}, 5000);
