@@ -35,7 +35,8 @@ function createParticipant(name: string): Participant {
     id: randomUUID(),
     name: name.trim(),
     joinedAt: now(),
-    lastActiveAt: Date.now()
+    lastActiveAt: Date.now(),
+    score: 0
   };
 }
 
@@ -54,7 +55,9 @@ export function createRoom(playerName: string) {
     status: "lobby",
     participants: [participant],
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
+    guesses: [],
+    drawingState: []
   };
 
   rooms.set(room.code, room);
@@ -165,7 +168,9 @@ export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSn
     secretWord,
     wordLength: room.wordLength,
     drawerId: room.drawerId,
-    roundNumber: room.roundNumber
+    roundNumber: room.roundNumber,
+    guesses: room.guesses.map(g => ({...g})),
+    drawingState: room.drawingState.map(d => ({...d}))
   };
 }
 
@@ -180,6 +185,14 @@ setInterval(() => {
       rooms.delete(code);
     } else if (room.participants.length < initialCount) {
       room.updatedAt = now();
+      
+      // Drawer timeout logic
+      if (room.status === "playing" && room.drawerId) {
+        const drawerExists = room.participants.some(p => p.id === room.drawerId);
+        if (!drawerExists) {
+          room.status = "finished"; // End round/game if drawer disconnects
+        }
+      }
     }
   }
 }, 5000);
