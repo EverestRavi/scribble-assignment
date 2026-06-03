@@ -18,7 +18,7 @@
 
 **Purpose**: Verify repository scaffolding and initial build baseline.
 
-- [ ] T001 Verify backend and frontend projects build cleanly using `npm run build` in both `backend/` and `frontend/`
+- [x] T001 Verify backend and frontend projects build cleanly using `npm run build` in both `backend/` and `frontend/`
 
 ---
 
@@ -28,10 +28,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T002 [P] Update TypeScript models in `backend/src/models/game.ts` to support playing status, participant lastActiveAt, and room snapshot hostId properties
-- [ ] T003 [P] Update request validation schemas in `backend/src/api/schemas.ts` to validate player nickname lengths (1-20 characters, trimmed) and room codes (6 alphanumeric characters)
-- [ ] T004 [P] Update frontend API TypeScript interfaces in `frontend/src/services/api.ts` to match updated room snapshot types
-- [ ] T005 [P] Update frontend store types in `frontend/src/state/roomStore.ts` to align with new API response schemas
+- [x] T002 [P] Update TypeScript models in `backend/src/models/game.ts` to support playing status, participant lastActiveAt, and room snapshot hostId properties
+- [x] T003 [P] Update request validation schemas in `backend/src/api/schemas.ts` to validate player nickname lengths (1-20 characters, trimmed) and room codes (6 alphanumeric characters)
+- [x] T004 [P] Update frontend API TypeScript interfaces in `frontend/src/services/api.ts` to match updated room snapshot types
+- [x] T005 [P] Update frontend store types in `frontend/src/state/roomStore.ts` to align with new API response schemas
 
 **Checkpoint**: Foundation ready - user story implementation can now begin.
 
@@ -45,10 +45,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [P] [US1] Update room code generation logic in `backend/src/services/roomStore.ts` to generate a 6-character alphanumeric code
-- [ ] T007 [P] [US1] Implement name validation and lastActiveAt initialization in createRoom in `backend/src/services/roomStore.ts`
-- [ ] T008 [US1] Implement input trimming and validation error displaying in `frontend/src/pages/CreateRoomPage.tsx`
-- [ ] T009 [US1] Add unit tests for room creation schema validations in `backend/src/api/schemas.test.ts`
+- [x] T006 [P] [US1] Update room code generation logic in `backend/src/services/roomStore.ts` to generate a 6-character alphanumeric code
+- [x] T007 [P] [US1] Implement name validation and lastActiveAt initialization in createRoom in `backend/src/services/roomStore.ts`
+- [x] T008 [US1] Implement input trimming and validation error displaying in `frontend/src/pages/CreateRoomPage.tsx`
+- [x] T009 [US1] Add unit tests for room creation schema validations in `backend/src/api/schemas.test.ts`
 
 **Checkpoint**: User Story 1 is fully functional and testable independently.
 
@@ -62,10 +62,10 @@
 
 ### Implementation for User Story 2
 
-- [ ] T010 [P] [US2] Update joinRoom in `backend/src/services/roomStore.ts` to enforce a maximum capacity check of 12 players
-- [ ] T011 [P] [US2] Update joinRoom in `backend/src/services/roomStore.ts` to enforce nickname uniqueness check (trimmed, case-insensitive) in the room
-- [ ] T012 [US2] Implement input trimming, room code length limits, and API error formatting in `frontend/src/pages/JoinRoomPage.tsx`
-- [ ] T013 [US2] Add unit tests for joining validations (duplicate names, room capacity) in `backend/src/api/schemas.test.ts`
+- [x] T010 [P] [US2] Update joinRoom in `backend/src/services/roomStore.ts` to enforce a maximum capacity check of 12 players
+- [x] T011 [P] [US2] Update joinRoom in `backend/src/services/roomStore.ts` to enforce nickname uniqueness check (trimmed, case-insensitive) in the room
+- [x] T012 [US2] Implement input trimming, room code length limits, and API error formatting in `frontend/src/pages/JoinRoomPage.tsx`
+- [x] T013 [US2] Add unit tests for joining validations (duplicate names, room capacity) in `backend/src/api/schemas.test.ts`
 
 **Checkpoint**: User Stories 1 and 2 work together. Players can join rooms securely.
 
@@ -79,11 +79,11 @@
 
 ### Implementation for User Story 3
 
-- [ ] T014 [P] [US3] Implement background interval to prune players after 10 seconds of no polling in `backend/src/services/roomStore.ts`
-- [ ] T015 [P] [US3] Update GET /rooms/:code route in `backend/src/api/rooms.ts` to update the polling participant's lastActiveAt timestamp
-- [ ] T016 [P] [US3] Implement POST /rooms/:code/start route in `backend/src/api/rooms.ts` to validate host credentials and start game
-- [ ] T017 [P] [US3] Add API calls for starting a game room in `frontend/src/services/api.ts` and `frontend/src/state/roomStore.ts`
-- [ ] T018 [US3] Implement auto-polling (every 2s), host-specific start controls, and auto-navigation to `/game` in `frontend/src/pages/LobbyPage.tsx`
+- [x] T014 [P] [US3] Implement background interval to prune players after 10 seconds of no polling in `backend/src/services/roomStore.ts`
+- [x] T015 [P] [US3] Update GET /rooms/:code route in `backend/src/api/rooms.ts` to update the polling participant's lastActiveAt timestamp
+- [x] T016 [P] [US3] Implement POST /rooms/:code/start route in `backend/src/api/rooms.ts` to validate host credentials and start game
+- [x] T017 [P] [US3] Add API calls for starting a game room in `frontend/src/services/api.ts` and `frontend/src/state/roomStore.ts`
+- [x] T018 [US3] Implement auto-polling (every 2s), host-specific start controls, and auto-navigation to `/game` in `frontend/src/pages/LobbyPage.tsx`
 
 **Checkpoint**: All user stories are complete. Game rooms can be setup, populated, and started.
 
@@ -93,9 +93,9 @@
 
 **Purpose**: Cross-story verification, automated testing, and build validations.
 
-- [ ] T019 Run all backend unit tests using `npm run test` in `backend/`
-- [ ] T020 Verify clean production builds using `npm run build` in both `backend/` and `frontend/`
-- [ ] T021 Validate end-to-end user scenarios and polling in local browser according to `specs/001-room-setup-lobby/quickstart.md`
+- [x] T019 Run all backend unit tests using `npm run test` in `backend/`
+- [x] T020 Verify clean production builds using `npm run build` in both `backend/` and `frontend/`
+- [x] T021 Validate end-to-end user scenarios and polling in local browser according to `specs/001-room-setup-lobby/quickstart.md`
 
 ---
 
