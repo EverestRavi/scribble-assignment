@@ -5,9 +5,13 @@ import {
   joinRoomSchema,
   roomCodeParamsSchema,
   roomViewerQuerySchema,
-  startGameSchema
+  startGameSchema,
+  submitDrawingSchema,
+  submitGuessSchema
 } from "./schemas.js";
 import { createRoom, getRoom, joinRoom, toRoomSnapshot, recordParticipantActivity, startGame } from "../services/roomStore.js";
+import { handleDrawingAction } from "../services/drawingService.js";
+import { handleGuess } from "../services/guessService.js";
 
 export function createRoomsRouter() {
   const router = Router();
@@ -88,6 +92,56 @@ export function createRoomsRouter() {
         error.message === "Cannot start game with fewer than 2 players" ||
         error.message === "Only the host can start the game" ||
         error.message === "Game has already started"
+      )) {
+        next(new HttpError(400, error.message));
+      } else {
+        next(error);
+      }
+    }
+  });
+
+  router.post("/:code/drawing", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId, action } = submitDrawingSchema.parse(request.body);
+      
+      const room = handleDrawingAction(code.toUpperCase(), participantId, action as any);
+      
+      if (!room) {
+        throw new HttpError(404, "Room not found after save");
+      }
+      
+      response.json({
+        room: toRoomSnapshot(room, participantId)
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("Drawer")) {
+        next(new HttpError(400, error.message));
+      } else {
+        next(error);
+      }
+    }
+  });
+
+  router.post("/:code/guesses", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const payload = submitGuessSchema.parse(request.body);
+      
+      const room = handleGuess(code.toUpperCase(), payload.participantId, payload);
+      
+      if (!room) {
+        throw new HttpError(404, "Room not found after save");
+      }
+      
+      response.json({
+        room: toRoomSnapshot(room, payload.participantId)
+      });
+    } catch (error) {
+      if (error instanceof Error && (
+        error.message === "Cannot guess when not playing" ||
+        error.message === "Drawer cannot guess" ||
+        error.message === "Participant not found"
       )) {
         next(new HttpError(400, error.message));
       } else {
