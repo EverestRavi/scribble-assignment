@@ -2,48 +2,36 @@
 
 This document details the architectural gaps, underlying assumptions, and relevant files identified during the development of the Scribble application.
 
-## 🔴 Architectural Gaps & Vulnerabilities
+## 🔴 Concrete Gaps in the Starter Code
 
-1. **Session Restoration & Reconnection Failures**
-   - **Gap**: If a user accidentally refreshes their browser during gameplay, their local React state is destroyed. The backend considers them still active (until the 10-second inactivity timeout), but the user cannot seamlessly rejoin. Attempting to rejoin with the same name throws a "Name is already taken" error.
-   - **Impact**: High. Players lose progress and access to the game on a simple page reload.
+1. **Gap 1 in the starter code: Session Restoration & Reconnection Failures**
+   - The starter code and subsequent features rely on in-memory React state linked to a volatile `participantId`. If a user refreshes their browser, they lose their session token and the backend throws a "Name is already taken" error if they try to rejoin.
    
-2. **Unbounded Memory Growth in Drawing State**
-   - **Gap**: The `drawingState` array in `Room` appends every single drawing coordinate action. Since there is no database, this lives entirely in-memory. Over a long drawing round, this array can become massive, causing the payload of the 1-second polling `GET /api/rooms/:code` request to explode in size.
-   - **Impact**: Medium to High. Can lead to severe network latency, high CPU usage for serialization, and potential Node.js Out-Of-Memory (OOM) crashes.
+2. **Gap 2 in the starter code: Unbounded Memory Growth in Drawing State**
+   - The starter code's in-memory data store appends every single drawing coordinate action to the `Room.drawingState` array. Without a database or a snapshotting mechanism, this array grows indefinitely during a round, risking massive payload sizes and high memory consumption on the Node server.
 
-3. **Lack of Secure Authorization**
-   - **Gap**: The system relies on self-reported `participantId` values in request bodies and headers to authorize actions (e.g., submitting a drawing or ending the game). There are no secure session tokens (JWTs) or signed cookies.
-   - **Impact**: Medium. A malicious actor who guesses or intercepts a `participantId` can easily spoof actions, hijack the host privileges, or draw on the canvas when they are supposed to be guessing.
+3. **Gap 3 in the starter code: Lack of Secure Authorization**
+   - The starter code relies exclusively on unverified client-provided `participantId` strings (passed in headers or bodies) to authorize actions. There are no signed session tokens (like JWTs), meaning any malicious actor could easily intercept or spoof a `participantId` to hijack host privileges or draw on the canvas.
 
-4. **Synchronous Polling Desynchronization**
-   - **Gap**: Because state sync relies exclusively on HTTP polling (mandated by the "No WebSockets" rule) every 1-2 seconds, clients are inherently desynchronized. A guesser might see a stroke 2 seconds after it was drawn, leading to awkward timing where a correct guess feels delayed.
-   - **Impact**: Low. It degrades the real-time "feel" of the game but does not break core functionality.
+## 🟡 Explicit Assumptions about the Environment and User Behavior
 
----
+1. **Assumption 1 about the environment: Single-Instance Vertical Scaling**
+   - We explicitly assume the application will only ever run on a single Node.js process environment. Because the data store is an in-memory JavaScript `Map` provided by the starter code, deploying this behind a load balancer with multiple instances would result in split-brain state (users hitting different servers wouldn't see the same rooms).
 
-## 🟡 Development Assumptions
+2. **Assumption 2 about user behavior: Honest Client Gameplay**
+   - We explicitly assume users act honestly and will not attempt to cheat. The `secretWord` is exposed in the `RoomSnapshot` during the `result` state, and if a bug accidentally exposed it to a guesser, or if a user intercepted network traffic, they could easily cheat. We assume standard cooperative gameplay behavior over implementing complex anti-cheat or strictly obfuscated packet payloads.
 
-1. **Single-Instance Deployment (Vertical Scaling Only)**
-   - **Assumption**: We assume the backend will only ever run on a single Node.js process. Because the datastore is a simple JavaScript `Map` (`rooms`), putting this application behind a load balancer with multiple instances would result in split-brain state (users hitting different servers wouldn't see the same rooms).
-
-2. **Network Stability & Polling Tolerance**
-   - **Assumption**: We assume users have relatively stable internet connections capable of handling continuous, heavy HTTP polling (1 request per second). We assume that the server will not rate-limit these users and that the overhead of HTTP headers on every stroke update is acceptable.
-
-3. **Honest Clients (No Cheat Prevention)**
-   - **Assumption**: We assume clients act honestly. For example, the `secretWord` is currently exposed in the `RoomSnapshot` to the drawer and in the `result` state. If a bug accidentally exposed the secret word to a guesser's payload, or if a user inspected the network tab, they could easily cheat. We assume standard gameplay over bulletproof anti-cheat mechanisms for this MVP.
+3. **Assumption 3 about the environment: Stable Network Polling Tolerance**
+   - We explicitly assume the host environment and the client's network are stable enough to handle aggressive, continuous HTTP polling (e.g., 1 request per second) without hitting rate limits or suffering from major latency jitter that would desynchronize drawing strokes.
 
 ---
 
 ## 📁 Relevant Files
 
-- **Backend State Management**: 
-  - `backend/src/services/roomStore.ts` (Handles in-memory Map, garbage collection, and game transitions)
-  - `backend/src/models/game.ts` (Defines the `Room` and `Participant` interfaces)
-- **Backend API & Services**:
-  - `backend/src/api/rooms.ts` (API routes relying on unverified `participantId`)
-  - `backend/src/services/drawingService.ts` (Appends to the unbounded `drawingState` array)
-  - `backend/src/services/guessService.ts` (Evaluates correctness and modifies scores)
-- **Frontend State & UI**:
-  - `frontend/src/state/roomStore.ts` (Manages the HTTP polling intervals)
-  - `frontend/src/pages/GamePage.tsx` (Coordinates the canvas, guesses, and polling lifecycle)
+- `backend/src/services/roomStore.ts`
+- `backend/src/models/game.ts`
+- `backend/src/api/rooms.ts`
+- `backend/src/services/drawingService.ts`
+- `backend/src/services/guessService.ts`
+- `frontend/src/state/roomStore.ts`
+- `frontend/src/pages/GamePage.tsx`
