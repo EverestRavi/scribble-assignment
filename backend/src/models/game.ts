@@ -1,10 +1,11 @@
 export type ParticipantRole = "drawer" | "guesser";
-export type RoomStatus = "lobby";
+export type RoomStatus = "lobby" | "playing" | "finished";
 
 export interface Participant {
   id: string;
   name: string;
   joinedAt: string;
+  lastActiveAt?: number; // UNIX timestamp (ms) of last poll
 }
 
 export interface Room {
@@ -21,6 +22,7 @@ export interface RoomSnapshot {
   participants: Participant[];
   availableWords: string[];
   roles: ParticipantRole[];
+  hostId: string; // The ID of the host player
 }
 
 export interface RoomSessionResponse {
