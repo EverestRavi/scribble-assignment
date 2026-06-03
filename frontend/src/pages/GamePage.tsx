@@ -5,11 +5,24 @@ import { GuessForm } from "../components/GuessForm";
 import { ResultPanel } from "../components/ResultPanel";
 import { RoomCodeBadge } from "../components/RoomCodeBadge";
 import { Scoreboard } from "../components/Scoreboard";
-import { useRoomState } from "../state/roomStore";
+import { useRoomState, useRoomStore } from "../state/roomStore";
+import { Canvas } from "../components/Canvas";
+import { GuessHistory } from "../components/GuessHistory";
 
 export function GamePage() {
   const navigate = useNavigate();
+  const roomStore = useRoomStore();
   const { room, participantId } = useRoomState();
+
+  useEffect(() => {
+    let interval: number;
+    if (room && room.status === "playing") {
+      interval = window.setInterval(() => {
+        roomStore.fetchRoom().catch((e) => console.error("Polling failed", e));
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [roomStore, room?.code, room?.status]);
 
   useEffect(() => {
     if (!room) {
@@ -49,13 +62,7 @@ export function GamePage() {
 
         <div className="game-page__main">
           <Card title="Canvas">
-            <div className="canvas-placeholder" style={{ minHeight: '500px', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {isDrawer ? (
-                <span style={{ color: '#6b7280', fontSize: '1.25rem' }}>Canvas Area (You are the Drawer)</span>
-              ) : (
-                <span style={{ color: '#6b7280', fontSize: '1.25rem' }}>Waiting for {drawer?.name ?? "drawer"} to draw...</span>
-              )}
-            </div>
+            <Canvas />
           </Card>
         </div>
 
@@ -82,6 +89,8 @@ export function GamePage() {
               <GuessForm />
             </Card>
           )}
+
+          <GuessHistory />
         </aside>
       </div>
 
