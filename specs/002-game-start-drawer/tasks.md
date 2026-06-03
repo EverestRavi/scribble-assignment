@@ -8,7 +8,7 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Verify standard project structure and dependencies in backend and frontend
+- [x] T001 Verify standard project structure and dependencies in backend and frontend
 
 ---
 
@@ -16,9 +16,9 @@
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-- [ ] T002 Update `Player` entity to include `isDrawer` boolean in `backend/src/models/player.ts` (or equivalent types file)
-- [ ] T003 Update `Room` / `GameState` entity to include `secretWord`, `wordLength`, `drawerId`, and `roundNumber` in `backend/src/models/room.ts`
-- [ ] T004 [P] Add a predefined list of starter words to `backend/src/services/wordService.ts`
+- [x] T002 Update `Player` entity to include `isDrawer` boolean in `backend/src/models/player.ts` (or equivalent types file)
+- [x] T003 Update `Room` / `GameState` entity to include `secretWord`, `wordLength`, `drawerId`, and `roundNumber` in `backend/src/models/room.ts`
+- [x] T004 [P] Add a predefined list of starter words to `backend/src/services/wordService.ts`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -32,9 +32,9 @@
 
 ### Implementation for User Story 1
 
-- [ ] T005 [P] [US1] Add schema validation for player name (trim, min 1, max 32) using Zod in `backend/src/api/routes/roomRoutes.ts` or corresponding schema file.
-- [ ] T006 [US1] Update `joinRoom` logic to reject duplicate names with "Name already taken" in `backend/src/services/roomService.ts`
-- [ ] T007 [P] [US1] Update frontend UI to display backend validation errors nicely when joining in `frontend/src/pages/Lobby.tsx`
+- [x] T005 [P] [US1] Add schema validation for player name (trim, min 1, max 32) using Zod in `backend/src/api/routes/roomRoutes.ts` or corresponding schema file.
+- [x] T006 [US1] Update `joinRoom` logic to reject duplicate names with "Name already taken" in `backend/src/services/roomService.ts`
+- [x] T007 [P] [US1] Update frontend UI to display backend validation errors nicely when joining in `frontend/src/pages/Lobby.tsx`
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -48,12 +48,12 @@
 
 ### Implementation for User Story 2
 
-- [ ] T008 [P] [US2] Update `startGame` logic to assign `isDrawer = true` to the first player in `backend/src/services/roomService.ts`
-- [ ] T009 [US2] Deterministically select a secret word (e.g., first word in list) and set it in room state in `backend/src/services/roomService.ts`
-- [ ] T010 [US2] Implement payload scrubbing logic in `backend/src/api/routes/roomRoutes.ts` to omit `secretWord` for non-drawer requesters
-- [ ] T011 [US2] Update frontend room store to handle `isDrawer`, `secretWord`, and `wordLength` in `frontend/src/state/roomStore.ts`
-- [ ] T012 [P] [US2] Update frontend UI for Drawer to clearly show they are drawing and display the `secretWord` in `frontend/src/pages/Game.tsx`
-- [ ] T013 [P] [US2] Update frontend UI for non-drawers to show blanks (`_ _ _ _ _`) and a waiting message in `frontend/src/pages/Game.tsx`
+- [x] T008 [P] [US2] Update `startGame` logic to assign `isDrawer = true` to the first player in `backend/src/services/roomService.ts`
+- [x] T009 [US2] Deterministically select a secret word (e.g., first word in list) and set it in room state in `backend/src/services/roomService.ts`
+- [x] T010 [US2] Implement payload scrubbing logic in `backend/src/api/routes/roomRoutes.ts` to omit `secretWord` for non-drawer requesters
+- [x] T011 [US2] Update frontend room store to handle `isDrawer`, `secretWord`, and `wordLength` in `frontend/src/state/roomStore.ts`
+- [x] T012 [P] [US2] Update frontend UI for Drawer to clearly show they are drawing and display the `secretWord` in `frontend/src/pages/Game.tsx`
+- [x] T013 [P] [US2] Update frontend UI for non-drawers to show blanks (`_ _ _ _ _`) and a waiting message in `frontend/src/pages/Game.tsx`
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -63,8 +63,8 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T014 Code cleanup and type checking across backend and frontend
-- [ ] T015 Verify build succeeds with no warnings
+- [x] T014 Code cleanup and type checking across backend and frontend
+- [x] T015 Verify build succeeds with no warnings
 
 ---
 

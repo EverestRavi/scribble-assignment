@@ -17,8 +17,8 @@ export function CreateRoomPage() {
       setError("Name cannot be empty");
       return;
     }
-    if (trimmedName.length > 20) {
-      setError("Name cannot exceed 20 characters");
+    if (trimmedName.length > 32) {
+      setError("Name cannot exceed 32 characters");
       return;
     }
 

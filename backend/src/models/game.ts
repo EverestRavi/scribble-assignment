@@ -6,6 +6,7 @@ export interface Participant {
   name: string;
   joinedAt: string;
   lastActiveAt?: number; // UNIX timestamp (ms) of last poll
+  isDrawer?: boolean;
 }
 
 export interface Room {
@@ -14,6 +15,10 @@ export interface Room {
   participants: Participant[];
   createdAt: string;
   updatedAt: string;
+  secretWord?: string;
+  wordLength?: number;
+  drawerId?: string;
+  roundNumber?: number;
 }
 
 export interface RoomSnapshot {
@@ -23,6 +28,10 @@ export interface RoomSnapshot {
   availableWords: string[];
   roles: ParticipantRole[];
   hostId: string; // The ID of the host player
+  secretWord?: string | null;
+  wordLength?: number;
+  drawerId?: string;
+  roundNumber?: number;
 }
 
 export interface RoomSessionResponse {
